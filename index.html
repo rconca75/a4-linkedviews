@@ -6,12 +6,13 @@
     <title>A4 Linked Views</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <div id="my_dataviz"></div>
+    <div id="barchart"></div>
 </head>
 <body>
     <script>
     const margin = {top: 10, right: 20, bottom: 30, left: 70},
-        width = 1000 - margin.left - margin.right,
-        height = 750 - margin.top - margin.bottom
+        width = 700 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom
 
     const svg = d3.select("#my_dataviz")
         .append("svg")
@@ -78,6 +79,8 @@
                 .html(d.Country)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY + 10) + "px")
+            
+            updateBarChart(d)
         }
 
         const mouseleave = function(event, d) {
@@ -140,6 +143,59 @@
                 .selectAll("circle")
                 .attr("cx", function (d) {return newX(d.Active)})
                 .attr("cy", function (d) {return newY(d.Recovered)})
+        }
+
+        // create linked bar chart
+        const barMargin = {top : 10, right: 20, bottom: 30, left: 70};
+        const barWidth = 400 - barMargin.left - barMargin.right;
+        const barHeight = 300 - barMargin.top - barMargin.bottom;
+
+        const barSvg = d3.select("#barchart")
+            .append("svg")
+            .attr("width", barWidth + barMargin.left + barMargin.right)
+            .attr("height", barHeight + barMargin.top + barMargin.bottom)
+            .append("g")
+            .attr("transform", `translate(${barMargin.left}, ${barMargin.top})`);
+
+        // add scales and axes
+        const barX = d3.scaleBand().range([0, barWidth]).padding(0.2);
+        const barY = d3.scaleLinear().range([barHeight, 0]);
+
+        const barXAxis = barSvg.append("g")
+            .attr("transform", `translate(0, ${barHeight})`);
+
+        const barYAxis = barSvg.append("g");
+
+        // update bar char function
+        function updateBarChart(countryData) {
+            // create array of values to display
+            const barData = [
+                {key: "Active", value: +countryData.Active},
+                {key: "Recovered", value: +countryData.Recovered},
+                {key: "Deaths", value: +countryData.Deaths},
+                {key: "Confirmed", value: +countryData.Confirmed}
+            ];
+
+            barX.domain(barData.map(d => d.key));
+            barY.domain([0, d3.max(barData, d => d.value)]);
+
+            // bind data
+            const bars = barSvg.selectAll(".bar").data(barData, d => d.key);
+
+            // enter and update
+            bars.enter()
+                .append("rect")
+                .attr("class", "bar")
+                .merge(bars)
+                .attr("x", d => barX(d.key))
+                .attr("y", d => barY(d.value))
+                .attr("width", barX.bandwidth())
+                .attr("height", d => barHeight - barY(d.value))
+                .attr("fill", "steelblue");
+
+            // update axes
+            barXAxis.call(d3.axisBottom(barX));
+            barYAxis.call(d3.axisLeft(barY));
         }
     })
     </script>
