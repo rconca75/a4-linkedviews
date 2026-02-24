@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A4 Linked Views</title>
+    <title>A4 Linked Views: COVID-19 Data</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <div id="my_dataviz"></div>
     <div id="barchart"></div>
@@ -39,6 +39,29 @@
         var yAxis = svg.append("g")
             .call(d3.axisLeft(y));
 
+        // add axis labelling
+        svg
+            .append('text')
+            .attr("x", width / 2)
+            .attr("y", height + 25)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "middle")
+            .style("fill", "black")
+            .style("font-size", "10px")
+            .text("Active Cases")
+
+        svg
+            .append('text')
+            .attr("x", -height/2)
+            .attr("y", -50)
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "end")
+            .attr("transform", "rotate(-90)")
+            .style("fill", "black")
+            .style("font-size", "10px")
+            .text("Recovered Cases")
+        
+
         // add clip path
         const clip = svg.append("defs").append("svg:clipPath")
             .attr("id", "clip")
@@ -72,11 +95,18 @@
         const mouseover = function(event, d) {
             tooltip
                 .style("opacity", 1)
+            d3.select(this)
+                .style("opacity", 1)
+                .style("stroke", "black")
+                .style("stroke-width", "1px")
         }
 
         const mousemove = function(event, d) {
             tooltip
-                .html(d.Country)
+                .html(
+                    "Country: " + d.Country +
+                    "<br>Region: " + d.WHO_Region
+                )
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY + 10) + "px")
             
@@ -88,6 +118,10 @@
                 .transition()
                 .duration(200)
                 .style("opacity", 0)
+            d3.select(this)
+                .style("opacity", 0.8)
+                .style("stroke", "none")
+                .style("stroke-width", "0px")
         }
         
         //add brushing
@@ -124,6 +158,8 @@
                 .attr("r", function (d) {return (d.Confirmed * 0.0002)})
                 .style("fill", d => myColor(d.WHO_Region))
                 .style("opacity", 0.8)
+                .style("stroke", "none")
+                .style("stroke-width", "0px")
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
             .on("mouseleave", mouseleave)
@@ -191,7 +227,32 @@
                 .attr("y", d => barY(d.value))
                 .attr("width", barX.bandwidth())
                 .attr("height", d => barHeight - barY(d.value))
-                .attr("fill", "steelblue");
+                .attr("fill", "steelblue")
+                .style("stroke", "none")
+                .style("stroke-width", "0px")
+                .on("mouseover", function(event, d) {
+                    tooltip.style("opacity", 1)
+                    d3.select(this)
+                        .style("fill", "darkblue")
+                        .style("stroke", "black")
+                        .style("stroke-width", "1px")
+                })
+                .on("mousemove", function(event, d) {
+                    tooltip
+                        .html(`${d.key}: ${d.value}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY + 10) + "px")
+                })
+                .on("mouseleave", function(event, d) {
+                    tooltip
+                        .transition()
+                        .duration(200)
+                        .style("opacity", 0)
+                    d3.select(this)
+                        .style("fill", "steelblue")
+                        .style("stroke", "none")
+                        .style("stroke-width", "0px")
+                })
 
             // update axes
             barXAxis.call(d3.axisBottom(barX));
