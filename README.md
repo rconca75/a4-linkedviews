@@ -28,6 +28,10 @@ The bar chart contains details about the number of active cases, recovered cases
 
 Since the axis of the bar chart automatically updates based on the max value in all four columns (usually confirmed cases), I added a tooltip that tells you the exact value of each column when hovering over that column and changes the color/outline of the bar as well.
 
+## Final Product Screenshot
+
+![Screenshot](vis_screenshot.png)
+
 ## Technical Achievements
 
 Each visualization is interactive for the viewer, mostly via a tooltip to give more information about the point/bar. These automatically populate with data directly from the CSV file.
